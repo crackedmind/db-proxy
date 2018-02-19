@@ -10,13 +10,15 @@ Simple MySQL proxy with query logging
 ### Windows
 
 #### Requirments
-* [cmake 3.9+](https://cmake.org)
+* [Visual C++ 15.5](https://docs.microsoft.com/en-us/visualstudio/install/install-visual-studio) (not tested on previous versions)
+* [cmake 3.11](https://cmake.org) - CMake versions prior to 3.11 doesn't support Boost 1.66, or update FindBoost.cmake module manually from master branch
 * [vcpkg](https://github.com/Microsoft/vcpkg)
 * [boost 1.66](https://boost.org)
 
 #### Build steps
 ```console
 > vcpkg install boost-asio:x64-windows
-> cmake --CMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake --DCMAKE_BUILD_TYPE=Release
+> mkdir build && cd build
+> cmake --CMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake --DCMAKE_BUILD_TYPE=Release ..
 > cmake --build . --config Release
 ```
