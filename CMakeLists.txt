@@ -17,7 +17,7 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE BOOST_ASIO_NO_DEPRECATED BOOS
 target_link_libraries(${PROJECT_NAME} Boost::boost Boost::system)
 
 # Rewrite options for static builds
-if(MSVC)
+if(MSVC AND VCPKG_TARGET_TRIPLET MATCHES "static")
     if(CMAKE_BUILD_TYPE STREQUAL "Release")
         target_compile_options(${PROJECT_NAME} PRIVATE /MT)
     elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
