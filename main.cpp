@@ -240,7 +240,7 @@ public:
                 remote_host = argv_[++i];
             if(arg == "--help") {
                 help();
-                return EXIT_SUCCESS;
+                return true;
             }
         }
 
