@@ -4,10 +4,10 @@
 #include "parser.hpp"
 #include "logger.hpp"
 
+namespace net = boost::asio;
+
 namespace db_proxy
 {
-    namespace ip = boost::asio::ip;
-
     enum { max_data_length = 8192 }; // 8KB
 
     class session : public std::enable_shared_from_this<session>
@@ -16,17 +16,17 @@ namespace db_proxy
 
         using ptr_type = std::shared_ptr<session>;
 
-        session(boost::asio::io_context& ios)
+        session(net::io_context& ios)
             : client_socket_(ios), server_socket_(ios)
         {
         }
 
-        ip::tcp::socket& client_socket()
+        net::ip::tcp::socket& client_socket()
         {
             return client_socket_;
         }
 
-        ip::tcp::socket& server_socket()
+        net::ip::tcp::socket& server_socket()
         {
             return server_socket_;
         }
@@ -34,8 +34,8 @@ namespace db_proxy
         void start(const std::string& server_host, unsigned short server_port)
         {
             server_socket_.async_connect(
-                        ip::tcp::endpoint(
-                            boost::asio::ip::make_address(server_host),
+                        net::ip::tcp::endpoint(
+                            net::ip::make_address(server_host),
                             server_port),
                         std::bind(&session::handle_server_connect,
                                   shared_from_this(),
@@ -48,14 +48,14 @@ namespace db_proxy
             {
                 std::cout << "Client connected from " << client_socket_.local_endpoint().address() << '\n';
                 server_socket_.async_read_some(
-                            boost::asio::buffer(server_data_, max_data_length),
+                            net::buffer(server_data_, max_data_length),
                             std::bind(&session::handle_server_read,
                                       shared_from_this(),
                                       std::placeholders::_1,
                                       std::placeholders::_2));
 
                 client_socket_.async_read_some(
-                            boost::asio::buffer(client_data_, max_data_length),
+                            net::buffer(client_data_, max_data_length),
                             std::bind(&session::handle_client_read,
                                       shared_from_this(),
                                       std::placeholders::_1,
@@ -74,7 +74,7 @@ namespace db_proxy
                 parser_.parse(server_data_, bytes_transferred);
 
                 async_write(client_socket_,
-                            boost::asio::buffer(server_data_, bytes_transferred),
+                            net::buffer(server_data_, bytes_transferred),
                             std::bind(&session::handle_client_write,
                                       shared_from_this(),
                                       std::placeholders::_1));
@@ -88,7 +88,7 @@ namespace db_proxy
             if (!error)
             {
                 server_socket_.async_read_some(
-                            boost::asio::buffer(server_data_, max_data_length),
+                            net::buffer(server_data_, max_data_length),
                             std::bind(&session::handle_server_read,
                                       shared_from_this(),
                                       std::placeholders::_1,
@@ -106,7 +106,7 @@ namespace db_proxy
                 parser_.parse(client_data_, bytes_transferred);
 
                 async_write(server_socket_,
-                            boost::asio::buffer(client_data_,bytes_transferred),
+                            net::buffer(client_data_,bytes_transferred),
                             std::bind(&session::handle_server_write,
                                       shared_from_this(),
                                       std::placeholders::_1));
@@ -120,7 +120,7 @@ namespace db_proxy
             if (!error)
             {
                 client_socket_.async_read_some(
-                            boost::asio::buffer(client_data_,max_data_length),
+                            net::buffer(client_data_,max_data_length),
                             std::bind(&session::handle_client_read,
                                       shared_from_this(),
                                       std::placeholders::_1,
@@ -141,8 +141,8 @@ namespace db_proxy
                 server_socket_.close();
         }
 
-        ip::tcp::socket client_socket_;
-        ip::tcp::socket server_socket_;
+        net::ip::tcp::socket client_socket_;
+        net::ip::tcp::socket server_socket_;
 
         uint8_t client_data_[max_data_length] = {0};
         uint8_t server_data_[max_data_length] = {0};
@@ -155,12 +155,12 @@ namespace db_proxy
     {
     public:
 
-        server(boost::asio::io_context& io_service,
+        server(net::io_context& io_service,
               const std::string& local_host, unsigned short local_port,
               const std::string& server_host, unsigned short server_port)
         : io_service_(io_service),
-          localhost_address(boost::asio::ip::make_address_v4(local_host)),
-          server_(io_service_,ip::tcp::endpoint(localhost_address,local_port)),
+          localhost_address(net::ip::make_address_v4(local_host)),
+          server_(io_service_,net::ip::tcp::endpoint(localhost_address,local_port)),
           server_port_(server_port),
           server_host_(server_host)
         {}
@@ -204,9 +204,9 @@ namespace db_proxy
             }
         }
 
-        boost::asio::io_context& io_service_;
-        ip::address_v4 localhost_address;
-        ip::tcp::acceptor server_;
+        net::io_context& io_service_;
+        net::ip::address_v4 localhost_address;
+        net::ip::tcp::acceptor server_;
         session::ptr_type session_;
         unsigned short server_port_;
         std::string server_host_;
@@ -261,7 +261,7 @@ public:
     }
 };
 
-static boost::asio::io_context ios;
+static net::io_context ios;
 
 BOOL WINAPI CtrlHandler(DWORD dwCtrlType) {
     switch (dwCtrlType)
