@@ -6,6 +6,8 @@
 #include <tuple>
 #include <queue>
 
+namespace db_proxy {
+
 namespace My {
 
     enum PacketType {
@@ -124,4 +126,7 @@ namespace My {
         size_t packets_ = 0;
         State current_state_;
     };
-}
+
+} // namespace My
+
+} // namespace db_proxy

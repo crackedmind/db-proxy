@@ -4,7 +4,10 @@
 #include "debug.hpp"
 #include "logger.hpp"
 
+namespace db_proxy {
+
 namespace My {
+
 Parser::~Parser(){
     prepared_stmts.clear();
 }
@@ -116,4 +119,6 @@ PacketHeader Parser::read_header(const uint8_t *data, size_t size)
     return header;
 }
 
-}
+} // namespace My
+
+} // namespace db_proxy
